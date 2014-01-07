@@ -40,6 +40,9 @@
   //window.addEventListener('focus', function(){if(state==STATE_PLAY)pause=false},false);
   window.addEventListener('blur', function(){if(state==STATE_PLAY)pause=true}, false);
 
+  function random(max){
+    return Math.random() * max; 
+  }
 
 
 
