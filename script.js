@@ -44,7 +44,16 @@
     return Math.random() * max; 
   }
 
+  function init(){
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
 
+    //enableInputs();
+    //setDensity();
+    //resize();
+    //onReady();
+    //run();
+  }
 
 
 })();
