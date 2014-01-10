@@ -48,12 +48,20 @@
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
+    setDensity();
     //enableInputs();
-    //setDensity();
     //resize();
     //onReady();
     //run();
   }
 
+  function setDensity(){
+    var VL = Math.min(window.innerWidth, window.innerHeight);
+    if(VL < 480) SU = 32; 
+    if(VL < 640) SU = 48; 
+    if(VL < 960) SU = 64;
+    else SU = 96;
+    if(window.console) console.log('Square Unit: ' + SU);
+  }
 
 })();
