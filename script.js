@@ -49,8 +49,8 @@
     ctx = canvas.getContext('2d');
 
     setDensity();
+    resize();
     //enableInputs();
-    //resize();
     //onReady();
     //run();
   }
@@ -64,4 +64,17 @@
     if(window.console) console.log('Square Unit: ' + SU);
   }
 
+  function resize(){
+    if(window.innerWidth < window.innerHeight){
+      canvas.width = SU * 10;
+      canvas.height = ~~(canvas.width * window.innerHeight / window.innerWidth);
+    }else {
+      canvas.width = SU * 10;
+      canvas.height = ~~SU * 15; //H_MIN = 13.3, H_NML = 15, H_MAX = 17.8
+    }
+    scale = canvas.height / window.innerHeight;
+    canvas.style.width = (canvas.width/scale) + 'px';
+    canvas.style.height = (canvas.height/scale) + 'px';
+    if(window.console) console.log('Screen size: ' + canvas.width + 'x' + canvas.height + '; Scale: ' + scale);
+  } 
 })();
