@@ -48,9 +48,9 @@
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
+    enableInputs();
     setDensity();
     resize();
-    //enableInputs();
     //onReady();
     //run();
   }
@@ -62,7 +62,7 @@
     if(VL < 960) SU = 64;
     else SU = 96;
     if(window.console) console.log('Square Unit: ' + SU);
-  }
+  }//function setDensity()
 
   function resize(){
     if(window.innerWidth < window.innerHeight){
@@ -76,5 +76,104 @@
     canvas.style.width = (canvas.width/scale) + 'px';
     canvas.style.height = (canvas.height/scale) + 'px';
     if(window.console) console.log('Screen size: ' + canvas.width + 'x' + canvas.height + '; Scale: ' + scale);
-  } 
+  }//function resize() 
+
+  function enableInputs(){
+    if(window.DeviceMotionEvent){
+      window.addEventListener('devicemotion', function(evt){
+        accelX = evt.accelerationIncludingGravity.x;
+        accelY = evt.accelerationIncludingGravity.y;
+      }, false);
+    }else if (window.console) console.warn('Device motion not supported');
+    
+    //touchstart
+    canvas.addEventListener('touchstart', function(evt){
+      evt.preventDefault();
+      var t = evt.changedTouches;
+      for(var i=0;i<t.length;i++){
+        var x = ~~((t[i].pageX - canvas.offsetLeft) * scale);
+        var y = ~~((t[i].pageY - canvas.offsetTop) * scale);
+        touches[t[i].identifier] = new Vtouch(x,y);
+      }
+      lastPress = 1; 
+    }, false);
+
+    //touchmove
+    canvas.addEventListener('touchmove', function(evt){
+      evt.preventDefault();//we prevent the default and do whatever we want
+      var t = evt.changedTouches; 
+      for(var i = 0; i<t.length;i++){
+        if(touches[t[i].identifier]){
+          touches[t[i].identifier].x = ~~((t[i].pageX - canvas.offsetLeft) * scale);
+          touches[t[i].identifier].y = ~~((t[i].pageY - canvas.offsetTop) * scale);
+        }
+      }
+    },false); 
+
+    //touchend
+    canvas.addEventListener('touchend', function(evt){
+      var t = evt.changedTouches;
+      for(var i = 0; i < t.length; i++){
+        touches[t[i].identifier] = null;
+      }
+    }, false);
+
+    //touchcancel
+    canvas.addEventListener('touchcancel', function(evt){
+      var t = evt.changedTouches;
+      for(var i = 0; i < t.length; i++){
+        touches[t[i].identifier] = null;
+      }
+    }, false);
+
+    //mousedown
+    canvas.addEventListener('mousedown', function(evt){
+      evt.preventDefault();
+      var x = ~~((evt.pageX - canvas.offsetLeft) * scale);
+      var y = ~~((evt.pageY - canvas.offsetTop) * scale);
+      touches[0] = new Vtouch(x,y);
+      lastPress = 1;
+    },false);
+
+    //mouseover
+    canvas.addEventListener('mousemove', function(evt){
+      console.log('mouse');
+      if (touches[0]){
+        touches[0].x = ~~((evt.pageX - canvas.offsetLeft) * scale);
+        touches[0].y = ~~((evt.pageY - canvas.offsetTop) * scale);
+      }  
+    },false);
+    
+    //mouseup
+    canvas.addEventListener('mouseup', function(evt){
+      touches[0] = null;
+    },false);
+
+    //keydown
+    document.addEventListener('keydown', function(evt){
+      if (evt.keyCode > 36 && evt.keyCode < 41){
+        evt.preventDefault();
+      }
+      if (!pressing[evt.keyCode]){
+        lastPress = evt.keyCode;
+      }
+      pressing[evt.keyCode] = true;
+    }, false);
+    
+    //keyup
+    document.addEventListener('keyup', function(evt){
+      pressing[evt.keyCode] = false;
+    }, false);
+
+    function Vtouch(x, y){
+      this.x = x || 0;
+      this.y = y || 0;
+      this.ox = this.x;
+      this.oy = this.y;
+    }
+  }//function enableInputs()
+
+
+
+
 })();
