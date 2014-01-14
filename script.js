@@ -51,7 +51,7 @@
     enableInputs();
     setDensity();
     resize();
-    //onReady();
+    onReady();
     //run();
   }
 
@@ -173,7 +173,22 @@
     }
   }//function enableInputs()
 
+  function onReady(){
+    btnPause = new Button(SU*4.5,SU/4,SU);
+    btnExit = new Button(SU*3, SU*10, SU*4, SU);
+    for(var i = 0; i<3; i++){
+      btnMove[i] = new Button(0, SU*10 + SU*i, SU*2, SU);
+      btnMove[i+3] = new Button(SU * 8, SU*10+SU*i, SU*2, SU);
+    }
+    for(var i = 0; i<controlModes.length; i++){
+      btnControlModes.push(new Button(SU*2, SU*3+SU*1.5*i, SU * 6, SU));
+    }
 
+    player = new Circle(0, 0, SU * 0.75);
+    iSprite.src = SU + '.sprites.png';
+    iBg.src = 'bg.png';
+    speed = SU/4;
+  }//function onReady
 
 
 })();
