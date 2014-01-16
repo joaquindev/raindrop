@@ -190,5 +190,33 @@
     speed = SU/4;
   }//function onReady
 
+  function Button(x, y, width, height){
+    this.x = (x == null) ? 0 : x; 
+    this.y = (y == null) ? 0 : y; 
+    this.width = (width == null) ? 0 : width;
+    this.height = (height == null) ? 0 : height;
+    this.touch = function(){
+      for(var i=0, l=touches.length; i<l; i++){
+        if(touches[i] != null){
+          if(this.x < touches[i].x &&
+             this.x + this.width > touches[i].x &&
+             this.y < touches[i].y &&
+             this.y + this.height > touches[i].y){
+            return true; 
+          }
+        }
+      }
+      return false;
+    }
+
+    this.stroke = function(){
+      ctx.strokeRect(this.x, this.y, this.width, this.height);
+    }
+    
+    this.fillTextCenter = function(ctx, str){
+      ctx.fillText(str, this.x + this.width/2, this.y + this.height - SU/4);
+    }
+  }
+
 
 })();
