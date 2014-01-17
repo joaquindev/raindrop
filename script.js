@@ -218,5 +218,38 @@
     }
   }
 
+  function Circle(x, y, radius){
+    this.x = (x == null ) ? 0 : x;   
+    this.y = (y == null ) ? 0 : y;   
+    this.radius = (radius == null ) ? 0 : radius;   
+
+    this.vx = 0;
+    this.vy = 0;
+    this.rotation = 0;
+    this.health = 0; 
+    this.timer = 0;
+
+    this.distance = function(circle){
+      if(circle != null){
+        var dx = this.x - circle.x;  
+        var dy = this.y - circle.y;  
+        return (Math.sqrt(dx * dx + dy * dy)-(this.radius + circle.radius));
+      }
+    }
+
+    this.distancePoint = function(x,y){
+      if(y != null){
+        var dx = this.x - x;
+        var dy = this.y - y;
+        return (Math.sqrt(dx * dx + dy * dy) - this.radius);
+      }
+    }
+
+    this.stroke = function(ctx){
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+      ctx.stroke();
+    }
+  }
 
 })();
