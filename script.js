@@ -25,7 +25,7 @@
   var state = 0, controlMode = 0;
   var speed = 0; 
   var score = 0; 
-  var dropTimer = 0; 
+  var dropTimer = 0;
   var bg = 0; 
   var player; 
   var enemies = []; 
@@ -185,10 +185,24 @@
     }
 
     player = new Circle(0, 0, SU * 0.75);
-    iSprite.src = SU + '.sprites.png';
+    iSprites.src = SU + '.sprites.png';
     iBg.src = 'bg.png';
     speed = SU/4;
   }//function onReady
+
+  function reset(){
+    player.x = canvas.width / 2;//Player
+    player.y = SU * 2;
+    player.health = 3;
+    player.timer = 0; 
+    enemies.length = 0;//Enemies
+    clouds.length = 0;//Clouds
+    drops.length = 0;//Drops
+    explosion.length = 0;//Explosions
+    speed = SU / 4;//Physics - Speed  
+    score = 0;//Score 
+    bg = 0;//Background 
+  }//function reset()
 
   function Button(x, y, width, height){
     this.x = (x == null) ? 0 : x; 
@@ -251,5 +265,7 @@
       ctx.stroke();
     }
   }
+
+
 
 })();
