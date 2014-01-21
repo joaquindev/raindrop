@@ -173,6 +173,103 @@
     }
   }//function enableInputs()
 
+  function setPlayerMovement(){
+    player.vx = 0;
+    player.vy = 0;
+    //We check what is our input control mode, by default is 0 - Tilt
+    if(controlMode == 0){//Control with ACCELERATION
+      //player.vx = -accelX/5;
+      //player.vy = -accelY/5;
+      if(accelX < -1){
+        player.vx = 1;
+      }else if(accelX > 1){
+        plyaer.vx = -1; 
+      }
+      if(accelY < 5){
+        player.vy = -1;
+      }else if(accelY > 9){
+        player.vy = 1;
+      }
+    }else if(controlMode == 1){//Control with BUTTONS
+      for(i=0, l=btnMove.lngth;i<l;i++){//for every button that is pressed
+        if(btnMove[i].touch()){
+          if(i/3 < 1){//if touch value is less than 1, we interpret as diminishing X value
+            player.vx -= 1;
+          }else{//otherwise we add up X value
+            player.vx += 1;
+          }  
+          if(i%3 == 0){//if the value is 0, Y diminishes
+            player.vy = -1;
+          }else if(i%3 == 2){//if the mod value is 2, Y goes up
+            player.vy = 1;
+          }
+        }
+      } 
+    }else if(controlMode == 2){//Control with DRAG 
+      if(touches[0]){
+        if(lastPress == 1){
+          if(player.radius + player.distancePoint(touches[0].x, touches[0].y) < SU){//if we touch the sprite
+            dragging = true;
+          }
+        }else if(dragging){
+          if(touches[0].x < player.x - speed * 0.02) player.vx = -1;//modify X velocity as negative to got left
+          else if(touches[0].x > player.x + speed * 0.02) player.vx = 1;//modify X vel as positive to go right 
+          if(touches[0].y < player.y - speed * 0.02) player.vy = -1;//modify Y vel as negative to go upward
+          else if(touches[0].y < player.y + speed * 0.02) player.vy = 1;//modify Y vel as pos to go downward
+          player.x = touches[0].x;//updating x,y sprite position
+          player.y = touches[0].y;
+        }
+      }else if(dragging){
+        dragging = false; 
+      }    
+    }else if(controlMode == 3){//Control with FollowTOUCH
+      if(touches[0]){
+        if(touches[0].x < player.x - SU/4){
+          player.vx = -1;
+        }else if(touches[0].x > player.x + SU/4){
+          player.vx = 1;
+        }if(touches[0].y < player.y - SU/4){
+          player.vy = -1;
+        }else if(touches[0].y > player.y + SU/4){
+          player.vy = 1;
+        }
+      }
+    }else if(controlMode == 4){//Control with GESTURES
+      for(var i=0; l=touches.length,i<l;i++){
+        if(touches[i]){
+          if(touches[i].x < SU*5){
+            player.vx -= 1;
+          }else{
+            player.vx += 1; 
+          }if(touches[i].oy - touches[i].y > SU/4){//we control old and new to calculate Y vel
+            player.vy = -1;
+          }else if(touches[i].oy - touches[i].y < -SU/4){
+            player.vy = 1;
+          }
+        }
+      }
+    }else if(controlMode == 5){//Control with VPAD 
+      if(touches[0]){
+        if(touches[0].ox - touches[0].x > SU/4){
+          player.vx = -1;
+        }else if(touches[0].ox - touches[0].x < -SU/4){
+          player.vx = 1; 
+        } 
+        if(touches[0].oy - touches[0].y > SU/4){
+          player.vy = -1;
+        }else if(touches[0].oy - touches[0].y < -SU/4){
+          player.vy = 1;
+        }
+      }
+    }
+
+    //Read keyboard input
+    if(pressing[37]){ player.vx = -1;}
+    if(pressing[38]){ player.vy = -1;}
+    if(pressing[39]){ player.vx = 1;}
+    if(pressing[40]){ player.vy = 1;}
+  }
+
   function onReady(){
     btnPause = new Button(SU*4.5,SU/4,SU);
     btnExit = new Button(SU*3, SU*10, SU*4, SU);
