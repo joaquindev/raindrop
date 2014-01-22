@@ -52,7 +52,237 @@
     setDensity();
     resize();
     onReady();
-    //run();
+    run();
+  }
+
+  
+  function run(){
+    requestAnimationFrame(run);
+
+    var now = Date.now();
+    var deltaTime = now - (time || now);
+    time = now;
+
+    act(deltaTime);
+    //paint(ctx);
+  }
+
+  function act(dt){
+    if(state == STATE_COVER){
+      if(lastPress == 1 || lastPress == 13){
+        state = STATE_MENU;
+      }
+      //clouds
+      for(var i = 0, l=clouds.length;i<l;i++){
+        clouds[i].y -= speed * dt * 0.01;//update clouds position base on the spped
+        if(clouds[i].y < -SU*2){
+          clouds.splice(i--, 1);
+          l--;
+        }
+      }
+      if(i < 1 || clouds[i-1].y < canvas.height - SU * 6){
+        clouds.push({x:~~random(canvas.width) - 64, y: canvas.height});//add another cloud
+      }
+    }
+    else if(state == STATE_MENU){
+     if(lastPress == 1){
+      for(var i = 0, l=btnControlModes.length;i<l;i++){
+        if(btnControlModes[i].touch()){
+          controlMode = i;
+          state = STATE_PLAY;
+          break;
+        }
+      }
+     }else if(lastPress == 13){
+      state = STATE_PLAY;
+     } 
+    }else{
+      var ct = dt * 0.02;
+      if(pause){
+        if(lastPress == 1 && btnExit.touch()){
+          player.health = 0;
+          state = STATE_COVER;
+        }
+      }else{
+        if(state == STATE_PLAY){
+          //Gameover reset
+          if(player.health < 1){
+            reset();
+          }
+
+          setPlayerMovement();
+          player.rotation = player.vx * 30;
+
+          //Move player
+          if(controlMode != 2){//control_DRAG
+            player.x += player.vx * speed * ct;
+            player.y += player.vy * speed * ct;
+          }
+          
+          //Player outbounds
+          if(player.x < player.radius){
+            player.x = player.radius;
+            player.vx = 0;
+          }
+          if(player.x > canvas.width - player.radius){
+            player.x = canvas.width - player.radius;
+            player.vx = 0;
+          }
+          if(player.y < player.radius){
+            player.y = player.radius;
+            player.vy = 0;
+          }
+          if(player.y > canvas.height - player.radius){
+            player.y = canvas.height - player.radius;
+            player.vy = 0;
+          }
+
+          //Move Background
+          bg += speed * dt * 0.0001;
+          if(bg > SU*15){
+            bg = SU * 15;
+          }
+        }else{
+          if(speed > SU/4){
+            speed -= SU/64;
+          }else{
+            speed = SU/4;
+          }
+        }     
+
+        //Clouds
+        for(var i=0, l=clouds.length;i<l;i++){
+          clouds[i].y -= speed * ct * 0.5;
+          if(clouds[i].y < -SU*2){
+            clouds.splice(i--, 1);
+            l--;
+          }
+        }
+
+        if(i < 1 || clouds[i-1].y < canvas.height - SU*6){
+          clouds.push({x:~~random(canvas.width)-64, y: canvas.height});
+        }
+        
+        //Enemies
+        for(var i = 0, l=enemies.length; i<l;i++){
+          enemies[i].y -= speed * ct;
+          enemies[i].rotation += 10 * ct; 
+          if(enemies[i].y < -enemies[i].radius){
+            enemies.splice(i--,1);
+            l--;
+            continue;
+          }
+
+          if(state == STATE_PLAY && player.timer < 1 && enemies[i].distance(player)<0){
+            player.health--; //player is hit by an enemy
+            if(player.health<1){
+              for(var j=0;j<8;j++){
+                var e = new Circle(player.x, player.y, SU/4);
+                e.rotation = 45 * j + 22.5;
+                e.timer = 2000;
+                explosion.push(e);
+              }
+            }else {
+              player.timer = 1000;
+            }
+          }
+        }
+
+        if(i < 1 || enemies[i-1].y < SU * 15){
+          enemies.push(new Circle(~~random(canvas.width), SU*30, SU*0.75));
+        }
+
+        //Drops, raindrop
+        for(var i =0, l=drops.length;i<l;i++){
+          drops[i].y -= speed * ct;
+          drops[i].timer += dt;
+          if(drops[i].timer > 400){
+            drops[i].timer -= 400;
+          }
+          if(drops[i].y < -drops[i].radius){
+            drops.splic(i--,1);
+            l--;
+            continue;
+          }
+          if(state == STATE_PLAY && drops[i].distance(player)<0){
+            score++;
+            speed += 0.1;
+            drops.splice(i--,1);
+            l--;
+          }
+        }
+
+        if(dropTimer > 0){
+          dropTimer -= dt; 
+        }else{
+          var type = ~~random(6);
+          var x = ~~random(canvas.width - SU * 2) + SU;
+          if(type == 1){
+            for(var i = 0; i<5; i++){
+              drops.push(new Circle (x - SU + SU * i * 0.5, canvas.height + SU * i, SU/2));
+            }
+          }else if(type == 2 ){
+            for(var i =0; i<5; i++){
+              drops.push(new Circle(x + SU - SU * i * 0.5, canvas.height + SU * i, SU/2));
+            }
+          }else if(type == 3){
+            for(var i = 0; i< 3; i++){
+              drops.push(new Circle(x, canvas.height + SU * i, SU/2));
+            }
+            drops.push(new Circle(x + SU, canvas.height + SU, SU/2));
+            drops.push(new Circle(x - SU, canvas.height + SU, SU/2));
+          }else if(type == 4){
+            drops.push(new Circle(x - SU, canvas.height, SU/2));
+            drops.push(new Circle(x + SU, canvas.height, SU/2));
+            drops.push(new Circle(x, canvas.height + SU, SU/2));
+            drops.push(new Circle(x - SU, canvas.height + SU * 2, SU/2));
+            drops.push(new Circle(x + SU, canvas.height + SU * 2, SU/2));
+          }else{
+            for(var i = 0; i<5;i++){
+              drops.push(new Circle(x, canvas.height + SU * i, SU/2));
+            }
+          }
+          dropTimer = 2000;
+        }
+
+        //Move explosion
+        for(var i = 0, l = explosion.length; i<l; i++){
+          var angle = (explosion[i].rotation - 90)*Math.PI/180;
+          explosion[i].x += Math.cos(angle) * SU/8;
+          explosion[i].y += Math.sin(angle) * SU/8;
+          explosion[i].timer -= dt;
+          if(explosion[i].timer < 1){
+            explosion.splice(i--, 1);
+            l--;
+          }else if(explosion[i].rotation < 180){
+            explosion[i].rotation += 2 * ct; 
+          }else if(explosion[i].rotation > 180){
+            explosion[i].rotation -= 2 * ct;
+          }
+        }
+
+        //End game
+        if(player.health < 1) state = STATE_GAMEOVER;
+        else if(player.timer > 0) player.timer -= dt;
+      }
+      //Pause
+      if(lastPress == 1 || lastPress == 13){
+        if(state == STATE_GAMEOVER){
+          if(btnExit.touch()){
+            state = STATE_COVER;
+          }else{
+            state = STATE_PLAY;
+          }
+        }else if(lastPress == 13 || pause || btnPause.touch()){
+          pause = !pause;
+        }
+      }
+    }
+    //ScreenDebug
+    if(lastPress == 75){
+      screenDebug = !screenDebug;
+    }
+    lastPress = null;
   }
 
   function setDensity(){
@@ -137,7 +367,6 @@
 
     //mouseover
     canvas.addEventListener('mousemove', function(evt){
-      console.log('mouse');
       if (touches[0]){
         touches[0].x = ~~((evt.pageX - canvas.offsetLeft) * scale);
         touches[0].y = ~~((evt.pageY - canvas.offsetTop) * scale);
@@ -235,7 +464,7 @@
         }
       }
     }else if(controlMode == 4){//Control with GESTURES
-      for(var i=0; l=touches.length,i<l;i++){
+      for(var i=0, l=touches.length;i<l;i++){
         if(touches[i]){
           if(touches[i].x < SU*5){
             player.vx -= 1;
