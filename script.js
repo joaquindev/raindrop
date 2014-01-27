@@ -64,7 +64,7 @@
     time = now;
 
     act(deltaTime);
-    //paint(ctx);
+    paint(ctx);
   }
 
   function act(dt){
@@ -200,7 +200,7 @@
             drops[i].timer -= 400;
           }
           if(drops[i].y < -drops[i].radius){
-            drops.splic(i--,1);
+            drops.splice(i--,1);
             l--;
             continue;
           }
@@ -283,6 +283,142 @@
       screenDebug = !screenDebug;
     }
     lastPress = null;
+  }
+
+  function paint(ctx){
+    ctx.fillStyle = "#9cf";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if(state == STATE_COVER){
+      //Clouds
+      for(var i = 0, l = clouds.length; i < l; i++){
+        ctx.drawImage(iSprites, 0, SU * 6, SU * 4, SU * 2, clouds[i].x, clouds[i].y, SU * 4, SU * 2);
+      }
+      //Title
+      var px = SU / 16;
+      var paddingTop = canvas.height / 2 - SU * 3;
+      ctx.font = 'italic ' + SU * 2 + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#333';
+      ctx.fillText('Raindrop!', SU * 4 + px, paddingTop + px);
+      ctx.fillText('Raindrop!', SU * 5 + px, paddingTop + SU * 2 + px);
+      ctx.fillText('Raindrop!', SU * 6 + px, paddingTop + SU * 4 + px);
+      ctx.fillStyle = '#fff';
+      ctx.fillText('Raindrop!', SU * 4, paddingTop);
+      ctx.fillText('Raindrop!', SU * 5, paddingTop + SU * 2);
+      ctx.fillText('Raindrop!', SU * 6, paddingTop + SU * 4); 
+      ctx.font = (SU * 0.5) + 'px sans-serif';
+      ctx.fillText('Touch to start', canvas.width / 2, paddingTop + SU * 7);
+    }else if(state == STATE_MENU){
+      //Menu
+      ctx.font = SU + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('Select control:', canvas.width / 2, SU * 2);
+      ctx.font = (SU * 0.5) + 'px sans-serif';
+      //Controls
+      ctx.strokeStyle = '#666';
+      ctx.fillStyle = '#666';
+      for(var i = 0; i < controlModes.length; i++){
+        btnControlModes[i].stroke(ctx);
+        btnControlModes[i].fillTextCenter(ctx,controlModes[i]);
+      }
+    }else{
+      ctx.drawImage(iBg, 0, canvas.height - bg, SU * 10, SU * 15);
+      //Clouds
+      for(var i = 0, l = clouds.length; i<l; i++){
+        ctx.drawImage(iSprites, 0, SU * 6, SU * 4, SU * 2, clouds[i].x, clouds[i].y, SU * 4, SU * 2); 
+      }
+      ctx.strokeStyle = '#0f0';
+      //Player
+      if(state == STATE_PLAY && ~~(player.timer / 50) % 2 == 0){
+        var dy = (player.vy > 0) ? 1 : (player.vy < 0) ? -1 : 0;
+        ctx.save();
+        ctx.translate(player.x, player.y); 
+        if(dy > 0){
+          ctx.rotate(-player.rotation * Math.DEG);
+        }else{
+          ctx.rotate(player.rotation * Math.DEG);
+        }
+        ctx.drawImage(iSprites, 0, SU * 2 * (dy + 1), SU * 2, SU * 2, -SU, -SU, SU * 2, SU * 2);
+        ctx.restore();
+      }
+      if(screenDebug) player.stroke(ctx);
+
+      //Drops
+      for(var i = 0, l = drops.length; i<l; i++){
+        var a = ~~(drops[i].timer / 100) % 4;
+        ctx.drawImage(iSprites, SU * 2 + ~~(a/2)*SU, a % 2 * SU, SU, SU, drops[i].x - SU / 2, drops[i].y - SU/2, SU, SU);
+        if(screenDebug) drops[i].stroke(ctx);
+      }
+
+      //Enemies
+      for(var i = 0, l = enemies.length; i<l; i++){
+        ctx.save();
+        ctx.translate(enemies[i].x, enemies[i].y);
+        ctx.rotate(enemies[i].rotation * Math.DEG);
+        ctx.drawImage(iSprites, SU * 2, SU * 2, SU * 2, SU * 2, -SU, -SU, SU * 2, SU * 2);
+        ctx.restore();
+        if(screenDebug) enemies[i].stroke(ctx);
+      }
+
+      //Lives
+      for(var i = 0, l = player.health; i<l; i++){
+        ctx.drawImage(iSprites, SU * 2, SU * 4, SU / 2, SU / 2, canvas.width - SU/2 - SU/2 *i, SU/2, SU/2, SU/2);
+      }
+
+      //Buttons
+      ctx.fillStyle = '#999';
+      ctx.strokeStyle = '#999';
+      if(controlMode == 1){//Buttons
+        for(var i = 0, l = btnMove.length; i<l; i++){
+          btnMove[i].stroke(ctx);
+        }
+      }else if (controlMode == 4){//Gestures
+        ctx.strokeRect(0, SU * 10, SU * 2, SU * 3);
+        ctx.strokeRect(SU * 8, SU * 10, SU * 2, SU * 3);
+      }else if(controlMode == 5){//VPad
+        if(touches[0]){
+          ctx.beginPath();
+          ctx.arc(touches[0].ox, touches[0].oy, SU, 0, Math.PI * 2, true);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(touches[0].ox + player.vx * SU / 2, touches[0].oy + player.vy * SU / 2, SU / 2, 0, Math.PI * 2, true); 
+          ctx.stroke();
+        }
+      }
+      ctx.fillRect(btnPause.x, btnPause.y, btnPause.width * 0.4, btnPause.height);
+      ctx.fillRect(btnPause.x + btnPause.width * 0.6, btnPause.y, btnPause.width * 0.4, btnPause.height);
+      if(screenDebug) btnPause.stroke(ctx);
+
+      //Text
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'left';
+      ctx.fillText('Score: ' + score, SU * 0.25, SU * 0.5);
+      if(state == STATE_GAMEOVER){
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over!', canvas.width / 2, canvas.height /2 - SU * 0.5);
+        ctx.fillText('Touch to start!', canvas.width / 2, canvas.height/2);
+        btnExit.stroke(ctx);
+        btnExit.fillTextCenter(ctx, 'Exit');
+      }else if(pause){
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText('Touch to play', canvas.width /2, canvas.height /2);
+        btnExit.stroke(ctx);
+        btnExit.fillTextCenter(ctx, 'Exit');
+      }
+    }
+
+    //Touch debug
+    ctx.fillStyle = '#999';
+    for(var i = 0, l = touches.length; i<l; i++){
+      if(touches[i] != null){
+        ctx.fillRect(touches[i].x - 1, touches[i].y - 1, 2, 2);
+      }
+    }
   }
 
   function setDensity(){
