@@ -1,0 +1,24 @@
+{
+  "name": "raindrop",
+  "version": "1.0.0",
+  "description": "An experiment to learn: Raindrop - HTML5 videogame. I do not own the copyright of anything related to this videogame which is entirely based on the fantastic work of Jugaame HTML5",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joaquindev/raindrop"
+  },
+  "keywords": [
+    "videogame",
+    "html5"
+  ],
+  "author": "joaquindev",
+  "license": "BSD",
+  "gitHead": "e43abac598ae7a6b9356fadd9da3d7415f347888",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "connect": "~2.12.0"
+  }
+}
